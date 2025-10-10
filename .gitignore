@@ -26,3 +26,6 @@ coverage/
 *.log
 .env
 .env.local
+
+# Claude Code
+.claude/
