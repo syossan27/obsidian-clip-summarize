@@ -1,6 +1,6 @@
 {
-  "id": "obsidian-clip-summarize",
-  "name": "Web Clipper Summarizer",
+  "id": "clip-summarize",
+  "name": "Clip Summarize",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
   "description": "Automatically summarize Web Clipper articles using OpenAI API",
