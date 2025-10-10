@@ -1,88 +1,88 @@
 # Obsidian Web Clipper Summarizer
 
-Obsidian Web Clipperで保存された記事を自動的にOpenAI APIで要約するプラグインです。
+Automatically summarize Web Clipper articles using OpenAI API.
 
-## 特徴
+## Features
 
-- 🤖 **AI自動要約**: Web Clipperで記事を保存すると、GPTが自動的に要約を生成
-- ⚡ **即座に実行**: ファイル作成を検知して自動で処理
-- 🎯 **柔軟な設定**: 要約の長さ、挿入位置、監視フォルダなどを細かく設定可能
-- 🎨 **複数の出力形式**: ファイル先頭、末尾、またはFrontmatterに要約を挿入
-- 🔧 **手動実行も可能**: コマンドパレットやリボンアイコンから任意のファイルを要約
+- 🤖 **AI Auto-summarization**: GPT automatically generates summaries when you save articles with Web Clipper
+- ⚡ **Instant Processing**: Detects file creation and processes automatically
+- 🎯 **Flexible Configuration**: Customize summary length, insertion position, watch folders, and more
+- 🎨 **Multiple Output Formats**: Insert summaries at the top, bottom, or in the frontmatter
+- 🔧 **Manual Execution**: Summarize any file via command palette or ribbon icon
 
-## 機能
+## Functionality
 
-### 自動要約
+### Auto-summarization
 
-Web Clipperで保存した記事に自動的にAI要約を追加します。設定した監視フォルダ内のファイルのみを処理することも可能です。
+Automatically adds AI summaries to articles saved with Web Clipper. You can configure it to only process files in specific watch folders.
 
-### 手動要約
+### Manual Summarization
 
-既存のファイルに対しても、コマンドパレットから「現在のファイルを要約」を実行するか、リボンアイコンをクリックすることで要約を生成できます。
+For existing files, you can generate summaries by running "Summarize current file" from the command palette or clicking the ribbon icon.
 
-### カスタマイズ可能な設定
+### Customizable Settings
 
-- **GPTモデル選択**: GPT-4 Turbo / GPT-4 / GPT-3.5 Turbo
-- **要約の長さ**: 短い（3-5行）/ 中程度（5-8行）/ 長い（2-3段落）
-- **挿入位置**: ファイル先頭 / ファイル末尾 / Frontmatter (YAML)
-- **監視フォルダ**: 特定のフォルダのみを自動要約の対象に設定可能
+- **GPT Model Selection**: GPT-4 Turbo / GPT-4 / GPT-3.5 Turbo
+- **Summary Length**: Short (3-5 lines) / Medium (5-8 lines) / Long (2-3 paragraphs)
+- **Insertion Position**: Top of file / Bottom of file / Frontmatter (YAML)
+- **Watch Folder**: Set specific folders to auto-summarize
 
-## インストール
+## Installation
 
-### Obsidianコミュニティプラグインから（推奨）
+### From Obsidian Community Plugins (Recommended)
 
-1. Obsidianで **設定** → **コミュニティプラグイン** → **閲覧** を開く
-2. "Web Clipper Summarizer" を検索
-3. **インストール** → **有効化**
+1. Open Obsidian **Settings** → **Community Plugins** → **Browse**
+2. Search for "Web Clipper Summarizer"
+3. Click **Install** → **Enable**
 
-### 手動インストール
+### Manual Installation
 
-1. [最新リリース](https://github.com/syossan27/obsidian-clip-summarize/releases)から `main.js`, `manifest.json`, `styles.css` をダウンロード
-2. Obsidian Vaultの `.obsidian/plugins/obsidian-clip-summarize/` フォルダに配置
-3. Obsidianでプラグインを有効化
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/syossan27/obsidian-clip-summarize/releases)
+2. Place them in `.obsidian/plugins/obsidian-clip-summarize/` in your Obsidian Vault
+3. Enable the plugin in Obsidian
 
-## 初期設定
+## Initial Setup
 
-1. Obsidianの **設定** → **Web Clipper Summarizer** を開く
-2. **OpenAI APIキー** を入力
-   - APIキーは [OpenAI Platform](https://platform.openai.com/api-keys) で取得できます
-3. お好みで以下を設定:
-   - GPTモデル（デフォルト: GPT-4 Turbo）
-   - 要約の長さ
-   - 挿入位置
-   - 監視フォルダ
+1. Open Obsidian **Settings** → **Web Clipper Summarizer**
+2. Enter your **OpenAI API Key**
+   - You can get an API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+3. Optionally configure:
+   - GPT Model (default: GPT-4 Turbo)
+   - Summary length
+   - Insertion position
+   - Watch folder
 
-> ⚠️ **注意**: OpenAI APIの利用には料金が発生します。[料金ページ](https://openai.com/pricing)をご確認ください。
+> ⚠️ **Note**: Using the OpenAI API incurs costs. Check the [pricing page](https://openai.com/pricing) for details.
 
-## 使い方
+## Usage
 
-### 自動要約
+### Auto-summarization
 
-1. プラグインを有効化し、OpenAI APIキーを設定
-2. Web Clipperで記事を保存
-3. 自動的に要約が生成されます
+1. Enable the plugin and configure your OpenAI API key
+2. Save articles with Web Clipper
+3. Summaries are automatically generated
 
-### 手動要約
+### Manual Summarization
 
-- **方法1**: コマンドパレット（`Cmd/Ctrl + P`）→ 「現在のファイルを要約」
-- **方法2**: 左サイドバーの星アイコン（✨）をクリック
+- **Method 1**: Command palette (`Cmd/Ctrl + P`) → "Summarize current file"
+- **Method 2**: Click the sparkles icon (✨) in the left sidebar
 
-## 開発
+## Development
 
-### セットアップ
+### Setup
 
 ```bash
 npm install
 npx lefthook install
 ```
 
-### 開発モード
+### Development Mode
 
 ```bash
 npm run dev
 ```
 
-### ビルド
+### Build
 
 ```bash
 npm run build
@@ -98,16 +98,16 @@ npm run type-check
 
 ### Git Hooks
 
-このプロジェクトはlefthookを使用しています:
+This project uses lefthook:
 
-- **pre-commit**: lint、format check、type checkを実行
-- **pre-push**: 全てのチェックとビルドを実行
-- **commit-msg**: Conventional Commits形式をチェック
+- **pre-commit**: Runs lint, format check, and type check
+- **pre-push**: Runs all checks and build
+- **commit-msg**: Checks for Conventional Commits format
 
-## ライセンス
+## License
 
 MIT
 
-## 作者
+## Author
 
-Your Name
+syossan27
