@@ -1,0 +1,38 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,js}"
+      run: npm run lint
+    format-check:
+      glob: "*.{ts,js,json,md}"
+      run: npm run format:check
+    type-check:
+      glob: "*.ts"
+      run: npm run type-check
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: npm run lint
+    format-check:
+      run: npm run format:check
+    type-check:
+      run: npm run type-check
+    build:
+      run: npm run build
+
+commit-msg:
+  commands:
+    conventional-commit:
+      run: |
+        COMMIT_MSG=$(cat {1})
+        # コミットメッセージが conventional commits 形式かチェック（簡易版）
+        if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?: .+"; then
+          echo "エラー: コミットメッセージはConventional Commits形式で記述してください"
+          echo "例: feat: 新機能を追加"
+          echo "    fix: バグを修正"
+          echo "    docs: ドキュメントを更新"
+          exit 1
+        fi

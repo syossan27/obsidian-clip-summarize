@@ -1,0 +1,21 @@
+/* Web Clipper Summarizer Plugin Styles */
+
+.clip-summarize-notice {
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.clip-summarize-success {
+  background-color: var(--interactive-success);
+  color: var(--text-on-accent);
+}
+
+.clip-summarize-error {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+/* 要約セクションのスタイリング */
+.markdown-preview-view h2:has-text("AI要約") {
+  color: var(--text-accent);
+}
