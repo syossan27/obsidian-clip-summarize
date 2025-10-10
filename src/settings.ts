@@ -14,12 +14,12 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Web Clipper Summarizer 設定' });
+    containerEl.createEl('h2', { text: 'Web Clipper Summarizer Settings' });
 
-    // OpenAI APIキー設定
+    // OpenAI API Key setting
     new Setting(containerEl)
-      .setName('OpenAI APIキー')
-      .setDesc('OpenAIのAPIキーを入力してください')
+      .setName('OpenAI API Key')
+      .setDesc('Enter your OpenAI API key')
       .addText((text) =>
         text
           .setPlaceholder('sk-...')
@@ -31,10 +31,10 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           })
       );
 
-    // GPTモデル選択
+    // GPT Model selection
     new Setting(containerEl)
-      .setName('GPTモデル')
-      .setDesc('使用するOpenAIのモデルを選択してください')
+      .setName('GPT Model')
+      .setDesc('Select the OpenAI model to use')
       .addDropdown((dropdown) =>
         dropdown
           .addOption('gpt-4-turbo-preview', 'GPT-4 Turbo')
@@ -47,10 +47,10 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           })
       );
 
-    // 自動要約の有効/無効
+    // Auto-summarize toggle
     new Setting(containerEl)
-      .setName('自動要約を有効化')
-      .setDesc('新しいファイルが作成されたときに自動的に要約を生成します')
+      .setName('Enable Auto-summarize')
+      .setDesc('Automatically generate summaries when new files are created')
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.autoSummarize).onChange(async (value) => {
           this.plugin.settings.autoSummarize = value;
@@ -58,13 +58,13 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
         })
       );
 
-    // 監視フォルダ設定
+    // Watch folder setting
     new Setting(containerEl)
-      .setName('監視フォルダ')
-      .setDesc('このフォルダ内のファイルのみ自動要約します（空欄の場合は全てのファイル）')
+      .setName('Watch Folder')
+      .setDesc('Only auto-summarize files in this folder (leave empty for all files)')
       .addText((text) =>
         text
-          .setPlaceholder('例: Clippings')
+          .setPlaceholder('e.g., Clippings')
           .setValue(this.plugin.settings.watchFolder)
           .onChange(async (value) => {
             this.plugin.settings.watchFolder = value;
@@ -72,14 +72,14 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           })
       );
 
-    // 要約の挿入位置
+    // Summary position
     new Setting(containerEl)
-      .setName('要約の挿入位置')
-      .setDesc('生成された要約をどこに挿入するか選択してください')
+      .setName('Summary Position')
+      .setDesc('Choose where to insert the generated summary')
       .addDropdown((dropdown) =>
         dropdown
-          .addOption('top', 'ファイルの先頭')
-          .addOption('bottom', 'ファイルの末尾')
+          .addOption('top', 'Top of file')
+          .addOption('bottom', 'Bottom of file')
           .addOption('frontmatter', 'Frontmatter (YAML)')
           .setValue(this.plugin.settings.summaryPosition)
           .onChange(async (value: 'top' | 'bottom' | 'frontmatter') => {
@@ -88,15 +88,15 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           })
       );
 
-    // 要約の長さ
+    // Summary length
     new Setting(containerEl)
-      .setName('要約の長さ')
-      .setDesc('生成する要約の長さを選択してください')
+      .setName('Summary Length')
+      .setDesc('Choose the length of the generated summary')
       .addDropdown((dropdown) =>
         dropdown
-          .addOption('short', '短い（3〜5行）')
-          .addOption('medium', '中程度（5〜8行）')
-          .addOption('long', '長い（2〜3段落）')
+          .addOption('short', 'Short (3-5 lines)')
+          .addOption('medium', 'Medium (5-8 lines)')
+          .addOption('long', 'Long (2-3 paragraphs)')
           .setValue(this.plugin.settings.summaryLength)
           .onChange(async (value: 'short' | 'medium' | 'long') => {
             this.plugin.settings.summaryLength = value;
@@ -104,19 +104,19 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           })
       );
 
-    // 情報セクション
-    containerEl.createEl('h3', { text: '使い方' });
+    // Usage section
+    containerEl.createEl('h3', { text: 'Usage' });
     const usageEl = containerEl.createEl('div', {
       cls: 'setting-item-description'
     });
     usageEl.innerHTML = `
-      <p>このプラグインは以下の方法で使用できます：</p>
+      <p>This plugin can be used in the following ways:</p>
       <ul>
-        <li><strong>自動要約</strong>: Web Clipperで記事を保存すると自動的に要約が生成されます</li>
-        <li><strong>手動要約</strong>: コマンドパレット（Cmd/Ctrl+P）から「現在のファイルを要約」を実行</li>
-        <li><strong>リボンアイコン</strong>: 左サイドバーの星アイコンをクリック</li>
+        <li><strong>Auto-summarize</strong>: Summaries are automatically generated when you save articles with Web Clipper</li>
+        <li><strong>Manual summarize</strong>: Run "Summarize current file" from the command palette (Cmd/Ctrl+P)</li>
+        <li><strong>Ribbon icon</strong>: Click the sparkles icon in the left sidebar</li>
       </ul>
-      <p><em>注意: OpenAI APIの使用には料金が発生します。詳細は<a href="https://openai.com/pricing">OpenAI公式サイト</a>をご確認ください。</em></p>
+      <p><em>Note: Using the OpenAI API incurs costs. See the <a href="https://openai.com/pricing">OpenAI pricing page</a> for details.</em></p>
     `;
   }
 }

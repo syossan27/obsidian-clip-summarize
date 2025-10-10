@@ -10,13 +10,13 @@ export default class ClipSummarizePlugin extends Plugin {
   async onload() {
     await this.loadSettings();
 
-    // OpenAIクライアントの初期化
+    // Initialize OpenAI client
     this.initializeOpenAI();
 
-    // 設定タブを追加
+    // Add settings tab
     this.addSettingTab(new ClipSummarizeSettingTab(this.app, this));
 
-    // ファイル作成イベントの監視
+    // Watch for file creation events
     this.registerEvent(
       this.app.vault.on('create', async (file) => {
         if (this.settings.autoSummarize && file instanceof TFile) {
@@ -25,31 +25,31 @@ export default class ClipSummarizePlugin extends Plugin {
       })
     );
 
-    // コマンド: 手動で要約を生成
+    // Command: Manually summarize current file
     this.addCommand({
       id: 'summarize-current-file',
-      name: '現在のファイルを要約',
+      name: 'Summarize current file',
       callback: async () => {
         const activeFile = this.app.workspace.getActiveFile();
         if (activeFile) {
           await this.summarizeFile(activeFile);
         } else {
-          new Notice('アクティブなファイルがありません');
+          new Notice('No active file');
         }
       }
     });
 
-    // リボンアイコンの追加
-    this.addRibbonIcon('sparkles', 'Web Clipper要約', async () => {
+    // Add ribbon icon
+    this.addRibbonIcon('sparkles', 'Summarize with AI', async () => {
       const activeFile = this.app.workspace.getActiveFile();
       if (activeFile) {
         await this.summarizeFile(activeFile);
       } else {
-        new Notice('アクティブなファイルがありません');
+        new Notice('No active file');
       }
     });
 
-    // プラグインロード完了
+    // Plugin loaded
   }
 
   initializeOpenAI() {
@@ -64,12 +64,12 @@ export default class ClipSummarizePlugin extends Plugin {
   }
 
   async handleNewFile(file: TFile) {
-    // 監視フォルダが設定されている場合、そのフォルダ内のファイルのみ処理
+    // Only process files in the watch folder if set
     if (this.settings.watchFolder && !file.path.startsWith(this.settings.watchFolder)) {
       return;
     }
 
-    // 少し待機してファイルの書き込みが完了するのを待つ
+    // Wait a bit for file write to complete
     await this.sleep(1000);
 
     await this.summarizeFile(file);
@@ -77,18 +77,18 @@ export default class ClipSummarizePlugin extends Plugin {
 
   async summarizeFile(file: TFile) {
     if (!this.openai) {
-      new Notice('OpenAI APIキーが設定されていません');
+      new Notice('OpenAI API key is not set');
       return;
     }
 
     try {
-      new Notice('要約を生成中...');
+      new Notice('Generating summary...');
 
       const content = await this.app.vault.read(file);
 
-      // すでに要約が存在するかチェック
-      if (content.includes('## AI要約') || content.includes('summary:')) {
-        new Notice('このファイルはすでに要約されています');
+      // Check if summary already exists
+      if (content.includes('## AI Summary') || content.includes('summary:')) {
+        new Notice('This file already has a summary');
         return;
       }
 
@@ -96,11 +96,11 @@ export default class ClipSummarizePlugin extends Plugin {
 
       if (summary) {
         await this.insertSummary(file, content, summary);
-        new Notice('要約が生成されました');
+        new Notice('Summary generated successfully');
       }
     } catch (error) {
-      console.error('要約生成エラー:', error);
-      new Notice('要約の生成に失敗しました');
+      console.error('Summary generation error:', error);
+      new Notice('Failed to generate summary');
     }
   }
 
@@ -110,12 +110,12 @@ export default class ClipSummarizePlugin extends Plugin {
     }
 
     const lengthInstructions = {
-      short: '3〜5行程度の簡潔な要約',
-      medium: '1段落（5〜8行）の要約',
-      long: '2〜3段落の詳細な要約'
+      short: 'a concise summary in 3-5 lines',
+      medium: 'a summary in 1 paragraph (5-8 lines)',
+      long: 'a detailed summary in 2-3 paragraphs'
     };
 
-    const prompt = `以下の記事を${lengthInstructions[this.settings.summaryLength]}として日本語で作成してください。重要なポイントを押さえ、読みやすくまとめてください。\n\n${content}`;
+    const prompt = `Please create ${lengthInstructions[this.settings.summaryLength]} of the following article. Focus on the key points and make it easy to read.\n\n${content}`;
 
     const response = await this.openai.chat.completions.create({
       model: this.settings.model,
@@ -123,7 +123,7 @@ export default class ClipSummarizePlugin extends Plugin {
         {
           role: 'system',
           content:
-            'あなたは優秀な記事要約アシスタントです。記事の重要なポイントを抽出し、分かりやすく要約します。'
+            'You are an excellent article summarization assistant. You extract key points from articles and summarize them clearly.'
         },
         {
           role: 'user',
@@ -142,15 +142,15 @@ export default class ClipSummarizePlugin extends Plugin {
 
     switch (this.settings.summaryPosition) {
       case 'top': {
-        newContent = `## AI要約\n\n${summary}\n\n---\n\n${originalContent}`;
+        newContent = `## AI Summary\n\n${summary}\n\n---\n\n${originalContent}`;
         break;
       }
       case 'bottom': {
-        newContent = `${originalContent}\n\n---\n\n## AI要約\n\n${summary}`;
+        newContent = `${originalContent}\n\n---\n\n## AI Summary\n\n${summary}`;
         break;
       }
       case 'frontmatter': {
-        // Frontmatterの処理
+        // Process frontmatter
         const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
         const match = originalContent.match(frontmatterRegex);
 
@@ -182,6 +182,6 @@ export default class ClipSummarizePlugin extends Plugin {
   }
 
   onunload() {
-    // プラグインアンロード完了
+    // Plugin unloaded
   }
 }
