@@ -3,8 +3,7 @@
   "name": "Clip Summarize",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
-  "description": "Automatically summarize Web Clipper articles using OpenAI API",
+  "description": "Automatically summarize web-clipped articles using the OpenAI API",
   "author": "syossan27",
-  "authorUrl": "https://github.com/syossan27/obsidian-clip-summarize",
   "isDesktopOnly": false
 }
