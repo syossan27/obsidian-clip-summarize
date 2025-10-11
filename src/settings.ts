@@ -109,14 +109,31 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
     const usageEl = containerEl.createEl('div', {
       cls: 'setting-item-description'
     });
-    usageEl.innerHTML = `
-      <p>This plugin can be used in the following ways:</p>
-      <ul>
-        <li><strong>Auto-summarize</strong>: Summaries are automatically generated when you save articles with Web Clipper</li>
-        <li><strong>Manual summarize</strong>: Run "Summarize current file" from the command palette (Cmd/Ctrl+P)</li>
-        <li><strong>Ribbon icon</strong>: Click the sparkles icon in the left sidebar</li>
-      </ul>
-      <p><em>Note: Using the OpenAI API incurs costs. See the <a href="https://openai.com/pricing">OpenAI pricing page</a> for details.</em></p>
-    `;
+
+    usageEl.createEl('p', { text: 'This plugin can be used in the following ways:' });
+
+    const ul = usageEl.createEl('ul');
+    const li1 = ul.createEl('li');
+    li1.createEl('strong', { text: 'Auto-summarize' });
+    li1.appendText(
+      ': Summaries are automatically generated when you save articles with Web Clipper'
+    );
+
+    const li2 = ul.createEl('li');
+    li2.createEl('strong', { text: 'Manual summarize' });
+    li2.appendText(': Run "Summarize current file" from the command palette (Cmd/Ctrl+P)');
+
+    const li3 = ul.createEl('li');
+    li3.createEl('strong', { text: 'Ribbon icon' });
+    li3.appendText(': Click the sparkles icon in the left sidebar');
+
+    const noteP = usageEl.createEl('p');
+    const noteEm = noteP.createEl('em');
+    noteEm.appendText('Note: Using the OpenAI API incurs costs. See the ');
+    noteEm.createEl('a', {
+      text: 'OpenAI pricing page',
+      href: 'https://openai.com/pricing'
+    });
+    noteEm.appendText(' for details.');
   }
 }
