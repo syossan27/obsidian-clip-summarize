@@ -1,17 +1,14 @@
-import { Plugin, TFile, Notice } from 'obsidian';
-import OpenAI from 'openai';
+import { Plugin, TFile, Notice, requestUrl } from 'obsidian';
 import { ClipSummarizeSettingTab } from './settings';
 import { ClipSummarizeSettings, DEFAULT_SETTINGS } from './types';
+import { ErrorCode, SummarizeError, mapOpenAIError } from './errors';
+import { t } from './i18n';
 
 export default class ClipSummarizePlugin extends Plugin {
   settings: ClipSummarizeSettings;
-  private openai: OpenAI | null = null;
 
   async onload() {
     await this.loadSettings();
-
-    // Initialize OpenAI client
-    this.initializeOpenAI();
 
     // Add settings tab
     this.addSettingTab(new ClipSummarizeSettingTab(this.app, this));
@@ -34,7 +31,8 @@ export default class ClipSummarizePlugin extends Plugin {
         if (activeFile) {
           await this.summarizeFile(activeFile);
         } else {
-          new Notice('No active file');
+          const error = new SummarizeError(ErrorCode.NO_ACTIVE_FILE, this.settings.language);
+          new Notice(error.getDisplayMessage());
         }
       }
     });
@@ -45,22 +43,12 @@ export default class ClipSummarizePlugin extends Plugin {
       if (activeFile) {
         await this.summarizeFile(activeFile);
       } else {
-        new Notice('No active file');
+        const error = new SummarizeError(ErrorCode.NO_ACTIVE_FILE, this.settings.language);
+        new Notice(error.getDisplayMessage());
       }
     });
 
     // Plugin loaded
-  }
-
-  initializeOpenAI() {
-    if (this.settings.openaiApiKey) {
-      this.openai = new OpenAI({
-        apiKey: this.settings.openaiApiKey,
-        dangerouslyAllowBrowser: true
-      });
-    } else {
-      this.openai = null;
-    }
   }
 
   async handleNewFile(file: TFile) {
@@ -76,65 +64,123 @@ export default class ClipSummarizePlugin extends Plugin {
   }
 
   async summarizeFile(file: TFile) {
-    if (!this.openai) {
-      new Notice('OpenAI API key is not set');
-      return;
-    }
+    const lang = this.settings.language;
+    const messages = t(lang);
 
     try {
-      new Notice('Generating summary...');
-
-      const content = await this.app.vault.read(file);
-
-      // Check if summary already exists
-      if (content.includes('## AI Summary') || content.includes('summary:')) {
-        new Notice('This file already has a summary');
-        return;
+      // Check API key
+      if (!this.settings.openaiApiKey) {
+        throw new SummarizeError(ErrorCode.API_KEY_NOT_SET, lang);
       }
 
+      new Notice(messages.notices.generatingSummary);
+
+      // Read file
+      let content: string;
+      try {
+        content = await this.app.vault.read(file);
+      } catch (error) {
+        throw new SummarizeError(ErrorCode.FILE_READ_ERROR, lang, error as Error);
+      }
+
+      // Check for empty file
+      if (!content || content.trim().length === 0) {
+        throw new SummarizeError(ErrorCode.CONTENT_EMPTY, lang);
+      }
+
+      // Check for existing summary
+      if (content.includes('## AI Summary') || content.includes('summary:')) {
+        throw new SummarizeError(ErrorCode.FILE_ALREADY_SUMMARIZED, lang);
+      }
+
+      // Generate summary
       const summary = await this.generateSummary(content);
 
-      if (summary) {
+      if (!summary || summary.trim().length === 0) {
+        throw new SummarizeError(ErrorCode.API_RESPONSE_EMPTY, lang);
+      }
+
+      // Insert summary
+      try {
         await this.insertSummary(file, content, summary);
-        new Notice('Summary generated successfully');
+        new Notice(messages.notices.summaryGenerated);
+      } catch (error) {
+        throw new SummarizeError(ErrorCode.FILE_WRITE_ERROR, lang, error as Error);
       }
     } catch (error) {
-      console.error('Summary generation error:', error);
-      new Notice('Failed to generate summary');
+      // Display with error code if SummarizeError
+      if (error instanceof SummarizeError) {
+        const message = error.getDisplayMessage();
+        console.error('Summary generation error:', error.getDebugInfo());
+        new Notice(message);
+      } else {
+        // Unexpected error
+        console.error('Unexpected error:', error);
+        const unknownError = new SummarizeError(ErrorCode.UNKNOWN_ERROR, lang, error as Error);
+        console.error(unknownError.getDebugInfo());
+        new Notice(unknownError.getDisplayMessage());
+      }
     }
   }
 
   async generateSummary(content: string): Promise<string> {
-    if (!this.openai) {
-      throw new Error('OpenAI client not initialized');
+    const lang = this.settings.language;
+    const messages = t(lang);
+
+    if (!this.settings.openaiApiKey) {
+      throw new SummarizeError(ErrorCode.OPENAI_CLIENT_NOT_INITIALIZED, lang);
     }
 
     const lengthInstructions = {
-      short: 'a concise summary in 3-5 lines',
-      medium: 'a summary in 1 paragraph (5-8 lines)',
-      long: 'a detailed summary in 2-3 paragraphs'
+      short: messages.prompts.summaryLengthShort,
+      medium: messages.prompts.summaryLengthMedium,
+      long: messages.prompts.summaryLengthLong
     };
 
-    const prompt = `Please create ${lengthInstructions[this.settings.summaryLength]} of the following article. Focus on the key points and make it easy to read.\n\n${content}`;
+    const prompt = messages.prompts.userPrompt
+      .replace('{length}', lengthInstructions[this.settings.summaryLength])
+      .replace('{content}', content);
 
-    const response = await this.openai.chat.completions.create({
-      model: this.settings.model,
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are an excellent article summarization assistant. You extract key points from articles and summarize them clearly.'
+    try {
+      const response = await requestUrl({
+        url: 'https://api.openai.com/v1/chat/completions',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.settings.openaiApiKey}`
         },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 1000
-    });
+        body: JSON.stringify({
+          model: this.settings.model,
+          messages: [
+            {
+              role: 'system',
+              content: messages.prompts.systemPrompt
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1000
+        })
+      });
 
-    return response.choices[0]?.message?.content || '';
+      if (response.status !== 200) {
+        const errorData = response.json;
+        const error: any = new Error(errorData.error?.message || `HTTP ${response.status}`);
+        error.status = response.status;
+        error.error = errorData.error;
+        throw error;
+      }
+
+      const data = response.json;
+      return data.choices[0]?.message?.content || '';
+    } catch (error) {
+      // Map OpenAI error to appropriate error code and details
+      const { code, details } = mapOpenAIError(error, lang);
+      throw new SummarizeError(code, lang, error as Error, details);
+    }
   }
 
   async insertSummary(file: TFile, originalContent: string, summary: string) {

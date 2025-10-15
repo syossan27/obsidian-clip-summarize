@@ -1,3 +1,20 @@
+export type Language =
+  | 'en' // English
+  | 'ja' // Japanese
+  | 'zh' // Chinese (Simplified)
+  | 'es' // Spanish
+  | 'fr' // French
+  | 'de' // German
+  | 'ko' // Korean
+  | 'pt' // Portuguese
+  | 'ru' // Russian
+  | 'it' // Italian
+  | 'ar' // Arabic
+  | 'hi' // Hindi
+  | 'nl' // Dutch
+  | 'tr' // Turkish
+  | 'pl'; // Polish
+
 export interface ClipSummarizeSettings {
   openaiApiKey: string;
   model: string;
@@ -5,6 +22,7 @@ export interface ClipSummarizeSettings {
   watchFolder: string;
   summaryPosition: 'top' | 'bottom' | 'frontmatter';
   summaryLength: 'short' | 'medium' | 'long';
+  language: Language;
 }
 
 export const DEFAULT_SETTINGS: ClipSummarizeSettings = {
@@ -13,5 +31,6 @@ export const DEFAULT_SETTINGS: ClipSummarizeSettings = {
   autoSummarize: true,
   watchFolder: '',
   summaryPosition: 'top',
-  summaryLength: 'medium'
+  summaryLength: 'medium',
+  language: 'en'
 };

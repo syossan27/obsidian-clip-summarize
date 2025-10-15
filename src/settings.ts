@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import type ClipSummarizePlugin from './main';
+import { t } from './i18n';
 
 export class ClipSummarizeSettingTab extends PluginSettingTab {
   plugin: ClipSummarizePlugin;
@@ -11,15 +12,49 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+    // Ensure language is set, default to 'en' if undefined
+    if (!this.plugin.settings.language) {
+      this.plugin.settings.language = 'en';
+    }
+    const messages = t(this.plugin.settings.language);
 
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Web Clipper Summarizer Settings' });
+    containerEl.createEl('h2', { text: 'Clip Summarize Settings' });
+
+    // Language setting
+    new Setting(containerEl)
+      .setName(messages.settings.languageName)
+      .setDesc(messages.settings.languageDesc)
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption('en', 'English')
+          .addOption('ja', '日本語')
+          .addOption('zh', '中文')
+          .addOption('es', 'Español')
+          .addOption('fr', 'Français')
+          .addOption('de', 'Deutsch')
+          .addOption('ko', '한국어')
+          .addOption('pt', 'Português')
+          .addOption('ru', 'Русский')
+          .addOption('it', 'Italiano')
+          .addOption('ar', 'العربية')
+          .addOption('hi', 'हिन्दी')
+          .addOption('nl', 'Nederlands')
+          .addOption('tr', 'Türkçe')
+          .addOption('pl', 'Polski')
+          .setValue(this.plugin.settings.language)
+          .onChange(async (value) => {
+            this.plugin.settings.language = value as any;
+            await this.plugin.saveSettings();
+            this.display(); // Refresh the settings UI
+          })
+      );
 
     // OpenAI API Key setting
     new Setting(containerEl)
-      .setName('OpenAI API Key')
-      .setDesc('Enter your OpenAI API key')
+      .setName(messages.settings.apiKeyName)
+      .setDesc(messages.settings.apiKeyDesc)
       .addText((text) =>
         text
           .setPlaceholder('sk-...')
@@ -27,14 +62,13 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.openaiApiKey = value;
             await this.plugin.saveSettings();
-            this.plugin.initializeOpenAI();
           })
       );
 
     // GPT Model selection
     new Setting(containerEl)
-      .setName('GPT Model')
-      .setDesc('Select the OpenAI model to use')
+      .setName(messages.settings.modelName)
+      .setDesc(messages.settings.modelDesc)
       .addDropdown((dropdown) =>
         dropdown
           .addOption('gpt-4-turbo-preview', 'GPT-4 Turbo')
@@ -49,8 +83,8 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
     // Auto-summarize toggle
     new Setting(containerEl)
-      .setName('Enable Auto-summarize')
-      .setDesc('Automatically generate summaries when new files are created')
+      .setName(messages.settings.autoSummarizeName)
+      .setDesc(messages.settings.autoSummarizeDesc)
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.autoSummarize).onChange(async (value) => {
           this.plugin.settings.autoSummarize = value;
@@ -60,8 +94,8 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
     // Watch folder setting
     new Setting(containerEl)
-      .setName('Watch Folder')
-      .setDesc('Only auto-summarize files in this folder (leave empty for all files)')
+      .setName(messages.settings.watchFolderName)
+      .setDesc(messages.settings.watchFolderDesc)
       .addText((text) =>
         text
           .setPlaceholder('e.g., Clippings')
@@ -74,13 +108,13 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
     // Summary position
     new Setting(containerEl)
-      .setName('Summary Position')
-      .setDesc('Choose where to insert the generated summary')
+      .setName(messages.settings.summaryPositionName)
+      .setDesc(messages.settings.summaryPositionDesc)
       .addDropdown((dropdown) =>
         dropdown
-          .addOption('top', 'Top of file')
-          .addOption('bottom', 'Bottom of file')
-          .addOption('frontmatter', 'Frontmatter (YAML)')
+          .addOption('top', messages.settings.summaryPositionTop)
+          .addOption('bottom', messages.settings.summaryPositionBottom)
+          .addOption('frontmatter', messages.settings.summaryPositionFrontmatter)
           .setValue(this.plugin.settings.summaryPosition)
           .onChange(async (value: 'top' | 'bottom' | 'frontmatter') => {
             this.plugin.settings.summaryPosition = value;
@@ -90,13 +124,13 @@ export class ClipSummarizeSettingTab extends PluginSettingTab {
 
     // Summary length
     new Setting(containerEl)
-      .setName('Summary Length')
-      .setDesc('Choose the length of the generated summary')
+      .setName(messages.settings.summaryLengthName)
+      .setDesc(messages.settings.summaryLengthDesc)
       .addDropdown((dropdown) =>
         dropdown
-          .addOption('short', 'Short (3-5 lines)')
-          .addOption('medium', 'Medium (5-8 lines)')
-          .addOption('long', 'Long (2-3 paragraphs)')
+          .addOption('short', messages.settings.summaryLengthShort)
+          .addOption('medium', messages.settings.summaryLengthMedium)
+          .addOption('long', messages.settings.summaryLengthLong)
           .setValue(this.plugin.settings.summaryLength)
           .onChange(async (value: 'short' | 'medium' | 'long') => {
             this.plugin.settings.summaryLength = value;
