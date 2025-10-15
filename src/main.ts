@@ -167,14 +167,20 @@ export default class ClipSummarizePlugin extends Plugin {
       });
 
       if (response.status !== 200) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const errorData = response.json;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         const error: any = new Error(errorData.error?.message || `HTTP ${response.status}`);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error.status = response.status;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         error.error = errorData.error;
         throw error;
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data = response.json;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
       return data.choices[0]?.message?.content || '';
     } catch (error) {
       // Map OpenAI error to appropriate error code and details

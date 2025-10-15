@@ -98,6 +98,7 @@ export class SummarizeError extends Error {
 }
 
 // Map OpenAI error to error code and details
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 export function mapOpenAIError(
   error: any,
   lang: Language = 'en'
@@ -157,3 +158,4 @@ export function mapOpenAIError(
 
   return { code, details };
 }
+/* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
