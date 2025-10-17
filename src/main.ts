@@ -52,8 +52,21 @@ export default class ClipSummarizePlugin extends Plugin {
   }
 
   async handleNewFile(file: TFile) {
-    // Only process files in the watch folder if set
-    if (this.settings.watchFolder && !file.path.startsWith(this.settings.watchFolder)) {
+    // 空欄の場合は処理しない
+    if (!this.settings.watchFolder) {
+      return;
+    }
+
+    // アスタリスクの場合は全ディレクトリを対象
+    if (this.settings.watchFolder === '*') {
+      // Wait a bit for file write to complete
+      await this.sleep(1000);
+      await this.summarizeFile(file);
+      return;
+    }
+
+    // 特定のディレクトリのみ対象
+    if (!file.path.startsWith(this.settings.watchFolder)) {
       return;
     }
 
